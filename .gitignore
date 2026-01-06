@@ -5,3 +5,4 @@ __pycache__
 build
 dist
 main.spec
+/yt-transcript-to-clipboard.spec

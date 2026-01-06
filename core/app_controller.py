@@ -35,7 +35,6 @@ class AppController:
             # В конце каждой попытки ставим разделитель в лог
             if self.main_window:
                 self.main_window.after(0, self.main_window.add_attempt_separator)
-
     def _process_clipboard(self):
         """Основная обработка: копируем буфер, получаем ID видео, скачиваем субтитры, очищаем, копируем обратно."""
         text = get_clipboard_text()
@@ -43,11 +42,14 @@ class AppController:
             raise ValueError("Clipboard is empty or not text")
         self.logger.info("Clipboard text read")
         if self.main_window:
-            self.main_window.after(0, lambda: self.main_window.log_message("Clipboard text read"))
+            self.main_window.after(0, lambda: self.main_window.log_message("Clipboard text read..."))
 
         video_id = extract_video_id(text)
         if not video_id:
-            raise ValueError("Clipboard does not contain a YouTube video link")
+            msg = "Clipboard does not contain a YouTube video link."
+            # self.logger.info(msg)
+            self.main_window.log_message(msg)
+            raise ValueError(msg)
         self.logger.info(f"YouTube video detected: https://www.youtube.com/watch?v={video_id}")
         if self.main_window:
             self.main_window.after(0, lambda: self.main_window.log_message(f"YouTube video detected: https://www.youtube.com/watch?v={video_id}"))

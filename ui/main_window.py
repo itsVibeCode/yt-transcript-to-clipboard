@@ -1,10 +1,29 @@
+import os
+import sys
 import tkinter as tk
+
+def resource_path(relative_path):
+    if hasattr(sys, "_MEIPASS"):
+        return os.path.join(sys._MEIPASS, relative_path)
+    return os.path.join(os.path.abspath("."), relative_path)
 
 class MainWindow(tk.Tk):
     def __init__(self):
         super().__init__()
-        self.title("YouTube Subtitles Downloader")
-        self.geometry("600x400")
+        self.title("YouTube Transcript Downloader")
+        self.geometry("600x200")
+        ico_path = resource_path("assets/icon.ico")
+        png_path = resource_path("assets/icon.png")
+        try:
+            self.iconbitmap(ico_path)  # Windows
+        except Exception:
+            pass
+
+        try:
+            icon = tk.PhotoImage(file=png_path)
+            self.iconphoto(True, icon)  # cross-platform
+        except Exception:
+            pass
 
         # Логовое текстовое поле (все консольные сообщения)
         self.log_text = tk.Text(self, wrap="word", state="disabled", height=20)
@@ -13,6 +32,7 @@ class MainWindow(tk.Tk):
         # Поле текущего уведомления (цветной текст)
         self.notification_label = tk.Label(self, text="", anchor="w", font=("Arial", 12))
         self.notification_label.pack(fill="x", padx=10, pady=(0,10))
+        self.log_message('Copy YouTube link and press Ctrl + Shift + Y')
 
     def log_message(self, message: str):
         """Выводим обычное сообщение в логовое поле"""
@@ -35,5 +55,6 @@ class MainWindow(tk.Tk):
         """Ставим разделитель после завершения одной попытки"""
         self.log_text.config(state="normal")
         self.log_text.insert("end", "------------------------------\n")
+        self.log_message('Copy YouTube link and press Ctrl + Shift + Y')
         self.log_text.see("end")
         self.log_text.config(state="disabled")

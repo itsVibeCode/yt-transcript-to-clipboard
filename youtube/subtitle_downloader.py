@@ -9,34 +9,18 @@ from utils.helpers import clean_subtitle_text, clean_segment_subtitles
 from youtube.default_lang import get_default_language
 import requests
 
-
-def download_subtitles(video_url: str, timeout: int = 30) -> Optional[str]:
+def normalize_lang(lang: str) -> str:
     """
-    Download subtitles (captions) from a YouTube video in the language of the main audio track.
-
-    Args:
-        video_url (str): full YouTube video URL
-        timeout (int): max time in seconds to wait
-
-    Returns:
-        str: cleaned subtitle text if SRT available,
-             cleaned segment text if only JSON segments available,
-             None if no subtitles at all
+    Normalize language code to base ISO 639-1.
+    Examples:
+        en-US -> en
+        en_US -> en
+        ru-RU -> ru
     """
-    ydl_opts = {
-        'skip_download': True,
-        'writesubtitles': True,
-        'writeautomaticsub': True,
-        'subtitlesformat': 'srt',
-        'quiet': True,
-        'no_warnings': True,
-    }
+    print(lang)
+    return lang.lower().replace('_', '-').split('-')[0]
 
-    default_lang = get_default_language(video_url)
-    if not default_lang:
-        print("Cannot determine default audio language")
-        return None
-
+def get_most_relevant_subs(ydl_opts, video_url, default_lang, timeout):
     try:
         with YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(video_url, download=False)
@@ -81,6 +65,38 @@ def download_subtitles(video_url: str, timeout: int = 30) -> Optional[str]:
         print(f"Error downloading subtitles: {e}")
         return None
 
+def download_subtitles(video_url: str, timeout: int = 30) -> Optional[str]:
+    """
+    Download subtitles (captions) from a YouTube video in the language of the main audio track.
+
+    Args:
+        video_url (str): full YouTube video URL
+        timeout (int): max time in seconds to wait
+
+    Returns:
+        str: cleaned subtitle text if SRT available,
+             cleaned segment text if only JSON segments available,
+             None if no subtitles at all
+    """
+    ydl_opts = {
+        'skip_download': True,
+        'writesubtitles': True,
+        'writeautomaticsub': True,
+        'subtitlesformat': 'srt',
+        'quiet': True,
+        'no_warnings': True,
+    }
+
+    default_lang = get_default_language(video_url)
+    if not default_lang:
+        print("Cannot determine default audio language")
+        return None
+    normalized_lang = normalize_lang(default_lang)
+    result = get_most_relevant_subs(ydl_opts, video_url, normalized_lang, timeout)
+    if not result:
+        print('Trying another way...')
+        result = get_most_relevant_subs(ydl_opts, video_url, default_lang, timeout)
+    return result
 
 def _fetch_subtitle_url(entry: Union[dict, list], timeout: int) -> Optional[Union[str, dict]]:
     """
@@ -120,6 +136,8 @@ if __name__ == "__main__":
     auto_en = 'https://www.youtube.com/watch?v=Gwct_dJDjJE'
     ruru = 'https://www.youtube.com/watch?v=bu2ADsx6yR4'
     masturbist = 'https://www.youtube.com/watch?v=ZFoNBxpXen4'
+    beluga = 'https://www.youtube.com/watch?v=kUjF9EH7v5s'
+    canada = 'https://www.youtube.com/watch?v=Say3pUbllSA'
     res_raw = download_subtitles(ruru)
     # print(res_raw)
     print('*'*1000)

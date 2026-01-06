@@ -1,4 +1,5 @@
 # main.py
+# build command: pyinstaller --onefile --windowed --name yt-transcript-to-clipboard --icon=assets/icon.ico --add-data "assets/icon.ico;assets" --add-data "assets/icon.png;assets" main.py
 from ui.main_window import MainWindow
 from core.app_controller import AppController
 from hotkeys.hotkey_listener import HotkeyListener

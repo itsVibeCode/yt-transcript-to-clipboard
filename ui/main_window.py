@@ -11,7 +11,7 @@ class MainWindow(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("YouTube Transcript Downloader")
-        self.geometry("600x200")
+        self.geometry("600x400")
         ico_path = resource_path("assets/icon.ico")
         png_path = resource_path("assets/icon.png")
         try:
